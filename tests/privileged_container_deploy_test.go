@@ -6,8 +6,8 @@ package tests
 import (
 	"fmt"
 
-	"github.com/yahoo/k8s-cis-check/client"
-	"github.com/yahoo/k8s-cis-check/util"
+	"github.com/yahoo/k8s-sec-check/client"
+	"github.com/yahoo/k8s-sec-check/util"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 

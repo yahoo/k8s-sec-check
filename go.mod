@@ -1,4 +1,4 @@
-module github.com/yahoo/k8s-cis-check
+module github.com/yahoo/k8s-sec-check
 
 go 1.12
 
