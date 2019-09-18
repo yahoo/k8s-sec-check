@@ -6,8 +6,8 @@ package tests
 import (
 	"log"
 
-	"github.com/yahoo/k8s-cis-check/client"
-	"github.com/yahoo/k8s-cis-check/util"
+	"github.com/yahoo/k8s-sec-check/client"
+	"github.com/yahoo/k8s-sec-check/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
