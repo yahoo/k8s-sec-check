@@ -9,7 +9,7 @@ import (
 
 	"github.com/yahoo/k8s-sec-check/client"
 	"github.com/yahoo/k8s-sec-check/util"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -25,8 +25,7 @@ var _ = BeforeSuite(func() {
 
 	client.KubernetesClient, client.RestConfig, err = client.GetClients()
 	if err != nil {
-		GinkgoT().
-			Error("Failed in before setup " + err.Error())
+		Fail("Failed in before setup " + err.Error())
 	}
 	log.Println("Target Namespace: " + util.TargetNamespace)
 	log.Println("Target Service Account: " + util.TargetServiceAccount)

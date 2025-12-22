@@ -5,7 +5,7 @@ package tests
 import (
 	"github.com/yahoo/k8s-sec-check/client"
 	"github.com/yahoo/k8s-sec-check/util"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -63,16 +63,13 @@ var _ = Describe("creating a pod", func() {
 	})
 
 	AfterEach(func() {
-		if CurrentGinkgoTestDescription().Failed {
+		if CurrentSpecReport().Failed() {
 			// delete the pod once the test is complete, if test created the pod successfully
 			err := util.DeletePod(client.KubernetesClient, PodName, util.TargetNamespace)
 			if err != nil {
-				GinkgoT().Logf("%s Failed in teardown. %v:%d err: %v %s",
-					redColor,
-					CurrentGinkgoTestDescription().FileName,
-					CurrentGinkgoTestDescription().LineNumber,
-					err.Error(),
-					defaultStyle,
+				GinkgoLogr.Error(err, "Failed in teardown",
+					"file", CurrentSpecReport().LeafNodeLocation.FileName,
+					"line", CurrentSpecReport().LeafNodeLocation.LineNumber,
 				)
 			}
 		}

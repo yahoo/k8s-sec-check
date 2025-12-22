@@ -7,13 +7,14 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	g "github.com/onsi/ginkgo"
+	g "github.com/onsi/ginkgo/v2"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
@@ -56,7 +57,7 @@ func getTargetServiceAccount() string {
 
 // CreateDeployment creates kubernetes deployment
 func CreateDeployment(clientset kubernetes.Interface, deployment *appsv1.Deployment, targetNamespace string) error {
-	_, err := clientset.AppsV1().Deployments(targetNamespace).Create(deployment)
+	_, err := clientset.AppsV1().Deployments(targetNamespace).Create(context.Background(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		return errors.New("Failed to create deployment: " + err.Error())
 	}
@@ -66,7 +67,7 @@ func CreateDeployment(clientset kubernetes.Interface, deployment *appsv1.Deploym
 // DeleteDeployment deletes kubernetes deployment
 func DeleteDeployment(clientset kubernetes.Interface, deploymentName string, targetNamespace string) error {
 	propagationPolicy := metav1.DeletePropagationForeground
-	err := clientset.AppsV1().Deployments(targetNamespace).Delete(deploymentName, &metav1.DeleteOptions{
+	err := clientset.AppsV1().Deployments(targetNamespace).Delete(context.Background(), deploymentName, metav1.DeleteOptions{
 		PropagationPolicy: &propagationPolicy,
 	})
 	if err != nil && !kerr.IsNotFound(err) {
@@ -79,7 +80,7 @@ func DeleteDeployment(clientset kubernetes.Interface, deploymentName string, tar
 func ReplicaSetsByLabel(clientset kubernetes.Interface, labelSelectorValue string, targetNamespace string) (*v1beta1.ReplicaSetList, error) {
 	return clientset.ExtensionsV1beta1().
 		ReplicaSets(targetNamespace).
-		List(metav1.ListOptions{
+		List(context.Background(), metav1.ListOptions{
 			LabelSelector: labelSelectorValue,
 		})
 }
@@ -103,7 +104,7 @@ func IsPrivilegedContainerCreated(rsList *v1beta1.ReplicaSetList,
 
 // CreatePod creates kubernetes pod
 func CreatePod(clientset kubernetes.Interface, pod *v1.Pod, targetNamespace string) error {
-	_, err := clientset.CoreV1().Pods(targetNamespace).Create(pod)
+	_, err := clientset.CoreV1().Pods(targetNamespace).Create(context.Background(), pod, metav1.CreateOptions{})
 	if err != nil {
 		return errors.New("Failed to create pod: " + err.Error())
 	}
@@ -113,7 +114,7 @@ func CreatePod(clientset kubernetes.Interface, pod *v1.Pod, targetNamespace stri
 // DeletePod deletes kubernetes pod
 func DeletePod(clientset kubernetes.Interface, podName string, targetNamespace string) error {
 	propagationPolicy := metav1.DeletePropagationForeground
-	err := clientset.CoreV1().Pods(targetNamespace).Delete(podName, &metav1.DeleteOptions{
+	err := clientset.CoreV1().Pods(targetNamespace).Delete(context.Background(), podName, metav1.DeleteOptions{
 		PropagationPolicy: &propagationPolicy,
 	})
 	if err != nil && !kerr.IsNotFound(err) {
@@ -127,11 +128,11 @@ func CheckReadyReplicas(clientset kubernetes.Interface, deploymentName string,
 	targetNamespace string, retryCount int) error {
 	for i := 0; i <= retryCount; i++ {
 		deployment, err := clientset.AppsV1().Deployments(targetNamespace).
-			Get(deploymentName, metav1.GetOptions{})
+			Get(context.Background(), deploymentName, metav1.GetOptions{})
 		if err != nil {
 			return errors.New("Failed to get deployment: " + err.Error())
 		}
-		log.Println(g.CurrentGinkgoTestDescription().TestText + ": waiting for the ready replicas...")
+		log.Println(g.CurrentSpecReport().LeafNodeText + ": waiting for the ready replicas...")
 		// try every 30 seconds
 		time.Sleep(30 * time.Second)
 
@@ -159,7 +160,7 @@ func GetStatusCondition(clientset kubernetes.Interface, deploymentName string) (
 			log.Println("error from ReplicaSetsByLabel")
 			return rsList, err
 		}
-		log.Printf(g.CurrentGinkgoTestDescription().TestText+
+		log.Printf(g.CurrentSpecReport().LeafNodeText+
 			": waiting for replicaset and status condition to be available "+
 			"for deployment: %v\n", deploymentName)
 		// sleep 30 seconds, wait for replication controller to create replicaset
