@@ -7,8 +7,7 @@ import (
 
 	"github.com/yahoo/k8s-sec-check/client"
 	"github.com/yahoo/k8s-sec-check/util"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -44,13 +43,13 @@ var _ = Describe("creating a deployment", func() {
 					// to authorization information.  This field allows you to impersonate it.
 					//Extra: ImpersonateUserExtra,
 				}
-				log.Println(CurrentGinkgoTestDescription().FullTestText +
+				log.Println(CurrentSpecReport().FullText() +
 					": Creating deployment as user: " +
 					client.RestConfig.Impersonate.UserName)
 
 				kc, err := kubernetes.NewForConfig(client.RestConfig)
 				if err != nil {
-					Fail(CurrentGinkgoTestDescription().FullTestText +
+					Fail(CurrentSpecReport().FullText() +
 						": Failed to get kubernetes client set" + err.Error())
 				}
 
@@ -82,12 +81,9 @@ var _ = Describe("creating a deployment", func() {
 		// delete the deployment once the test is complete
 		err := util.DeleteDeployment(client.KubernetesClient, deploymentName, util.TargetNamespace)
 		if err != nil {
-			GinkgoT().Logf("%s Failed in teardown. %v:%d err: %v %s",
-				redColor,
-				CurrentGinkgoTestDescription().FileName,
-				CurrentGinkgoTestDescription().LineNumber,
-				err.Error(),
-				defaultStyle,
+			GinkgoLogr.Error(err, "Failed in teardown",
+				"file", CurrentSpecReport().LeafNodeLocation.FileName,
+				"line", CurrentSpecReport().LeafNodeLocation.LineNumber,
 			)
 		}
 	})

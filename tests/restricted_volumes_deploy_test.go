@@ -8,7 +8,7 @@ import (
 
 	"github.com/yahoo/k8s-sec-check/client"
 	"github.com/yahoo/k8s-sec-check/util"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -102,7 +102,7 @@ var _ = Describe("creating a deployment", func() {
 			// once deployment is created, find replicaSet for the deployment by label
 			rsList, err := util.GetStatusCondition(client.KubernetesClient, deploymentName)
 			if err != nil {
-				Fail(CurrentGinkgoTestDescription().TestText + ":" + err.Error())
+				Fail(CurrentSpecReport().LeafNodeText + ":" + err.Error())
 			}
 
 			// if not error, but failed to find the replica set, fail.
@@ -150,12 +150,9 @@ var _ = Describe("creating a deployment", func() {
 		// delete the deployment once the test is complete
 		err := util.DeleteDeployment(client.KubernetesClient, deploymentName, util.TargetNamespace)
 		if err != nil {
-			GinkgoT().Logf("%s Failed in teardown. %v:%d err: %v %s",
-				redColor,
-				CurrentGinkgoTestDescription().FileName,
-				CurrentGinkgoTestDescription().LineNumber,
-				err.Error(),
-				defaultStyle,
+			GinkgoLogr.Error(err, "Failed in teardown",
+				"file", CurrentSpecReport().LeafNodeLocation.FileName,
+				"line", CurrentSpecReport().LeafNodeLocation.LineNumber,
 			)
 		}
 	})
